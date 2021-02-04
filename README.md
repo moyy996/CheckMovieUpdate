@@ -1,5 +1,11 @@
 # 视频更新检查工具
 
+<a title="Hits" target="_blank" href="https://github.com/moyy996/CheckMovieUpdate"><img src="https://hits.b3log.org/moyy996/CheckMovieUpdate.svg"></a>
+![](https://img.shields.io/github/downloads/moyy996/CheckMovieUpdate/total.svg?style=flat-square)
+![](https://img.shields.io/github/release/moyy996/CheckMovieUpdate.svg?style=flat-square)
+![](https://img.shields.io/badge/Python-3.7-yellow.svg?style=flat-square&logo=python)<br>
+
+
 ## 参数说明
 
 ```
