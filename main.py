@@ -102,13 +102,13 @@ def get_actor_site(config_value, actor_info, page):
 
 
 # 下载函数
-def download_file_with_filename(cover_url, filename, filepath, timeout, retry_count):
-    print(filename + ' 下载中......')
+def download_file_with_filename(cover_url, filename, filepath, timeout, retry_count, current_time):
+    print('   [+]' + filename + ' 下载中......')
     for i in range(retry_count):
         try:
             # 文件夹不存在就创建
             # 二层目录 以当前时间为文件夹名
-            filepath = filepath + "/" + str(time.strftime("%Y-%m-%d %H-%M-%S", time.localtime()))
+            filepath = filepath + "/" + current_time
             if not os.path.exists(filepath):
                 os.makedirs(filepath)
             # 请求数据
@@ -116,21 +116,21 @@ def download_file_with_filename(cover_url, filename, filepath, timeout, retry_co
                 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/68.0.3440.106 Safari/537.36'}
             r = requests.get(cover_url, timeout=timeout, headers=headers)
             if r == '':
-                print('[-]封面下载失败，返回结果为空!')
+                print('   [-]封面下载失败，返回结果为空!')
                 return
             # 写入图片
             with open(str(filepath) + "/" + filename, "wb") as code:
                 code.write(r.content)
-            print('[+]下载成功!')
+            print('   [+]下载成功!')
             return
         except Exception as err_info:
             i += 1
-            print('[-]封面下载 :  重试 ' + str(i) + '/' + str(retry_count) + '，错误：' + str(err_info))
-    print('[-]下载失败!')
+            print('   [-]封面下载 :  重试 ' + str(i) + '/' + str(retry_count) + '，错误：' + str(err_info))
+    print('   [-]下载失败!')
 
 
 # 下载封面
-def download_movie_cover(cover_url, number, actor, release, config_value):
+def download_movie_cover(cover_url, number, actor, release, config_value, current_time):
     # 获取需要的变量
     downloadCover = config_value['downloadCover']
     switch = downloadCover['switch']
@@ -144,7 +144,7 @@ def download_movie_cover(cover_url, number, actor, release, config_value):
     # 封面名称处理
     img_name = img_name.replace('number', number).replace('actor', actor).replace('release', release)
     # 下载
-    download_file_with_filename(cover_url, img_name, img_path, timeout, retry_count)
+    download_file_with_filename(cover_url, img_name, img_path, timeout, retry_count, current_time)
 
 
 # 检查是否符合过滤条件
@@ -163,6 +163,7 @@ def check_filter(title, number, filterTitleKeywords, filterNumberOrPrefix):
 
 
 def main_function(config_value):
+    current_time = str(time.strftime("%Y-%m-%d %H-%M-%S", time.localtime()))
     # 演员列表
     actor_list = config_value['actorList']
     # 过滤条件
@@ -175,10 +176,9 @@ def main_function(config_value):
         lastDownloadMovieNumber = actor_info['lastDownloadMovieNumber']
         lastDownloadMovieReleaseDate = actor_info['lastDownloadMovieReleaseDate']
         check = int(str(actor_info['check']))
-        flag = 0  # 是否有更新
+        count_new_movie = 0  # 是否有更新
         print('========================================================================')
-        print('{0: <20}'.format(actor), '        ', '{0: <20}'.format(lastDownloadMovieNumber), '        ',
-              '{0: <20}'.format(lastDownloadMovieReleaseDate))
+        print('演员：' + actor + ' | 上次下载番号：' + lastDownloadMovieNumber + ' | 发行日期：' + lastDownloadMovieReleaseDate)
         # 此演员不需要检查就跳过
         if not check:
             continue
@@ -203,11 +203,11 @@ def main_function(config_value):
                 if lastDownloadMovieReleaseDate <= release and lastDownloadMovieNumber != number:
                     # 如果不符合过滤条件
                     if check_filter(title, number, filterTitleKeywords, filterNumberOrPrefix):
-                        print('{0: <20}'.format('番号：' + number), '        ', '{0: <20}'.format('发行日期：' + release),
+                        count_new_movie += 1
+                        print('{0: <20}'.format('[' + str(count_new_movie) + ']番号：' + number) + '{0: <20}'.format('发行日期：' + release) +
                               ('网址：' + site))
                         # 下载封面
-                        download_movie_cover(cover, number, actor, release, config_value)
-                        flag = 1
+                        download_movie_cover(cover, number, actor, release, config_value, current_time)
                 else:
                     # 跳出第三次循环
                     break
@@ -215,7 +215,7 @@ def main_function(config_value):
             # 跳出第二次循环
             if count != counts:
                 break
-        if not flag:
+        if not count_new_movie:
             print('无影片更新\n')
         else:
             print('\n')
