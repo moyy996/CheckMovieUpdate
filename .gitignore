@@ -1,6 +1,6 @@
 
 *.spec
-/.idea/
+.idea
 __pycache__
 movieCovers
 *.xml
