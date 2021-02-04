@@ -1,4 +1,6 @@
 import json
+import time
+
 import requests
 import os
 from lxml import etree
@@ -105,6 +107,8 @@ def download_file_with_filename(cover_url, filename, filepath, timeout, retry_co
     for i in range(retry_count):
         try:
             # 文件夹不存在就创建
+            # 二层目录 以当前时间为文件夹名
+            filepath = filepath + "/" + str(time.strftime("%Y-%m-%d %H-%M-%S", time.localtime()))
             if not os.path.exists(filepath):
                 os.makedirs(filepath)
             # 请求数据
@@ -217,22 +221,7 @@ def main_function(config_value):
             print('\n')
 
 
-# if __name__ == '__main__':
-#     # 读取config文件
-#     configFileName = "config.json"
-#     config_value = read_json(configFileName)
-#
-#     # 主功能
-#     main_function(config_value)
-#
-#     # 修改最后一次检查时间为现在时刻
-#     # 写入后会变成一行 所以废弃
-#     # config_value['lastCheckTime'] = str(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
-#     # write_json(configFileName, config_value)
-#
-#     input("[+]按任意键结束，你可以在结束之前查看和错误信息。")
-
-def main():
+if __name__ == '__main__':
     # 读取config文件
     configFileName = "config.json"
     config_value = read_json(configFileName)
@@ -246,6 +235,3 @@ def main():
     # write_json(configFileName, config_value)
 
     input("[+]按任意键结束，你可以在结束之前查看和错误信息。")
-
-
-main()
