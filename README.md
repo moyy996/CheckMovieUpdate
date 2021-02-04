@@ -37,7 +37,7 @@
 
 ```
 ## 效果图
-<div align="center">
+<div>
 <img src="https://github.com/moyy996/CheckMovieUpdate/blob/main/Img/main.png" height="700">
 <img src="https://github.com/moyy996/CheckMovieUpdate/blob/main/Img/image.png" height="300">
 </div>
