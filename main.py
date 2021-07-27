@@ -5,6 +5,7 @@ import requests
 import os
 from lxml import etree
 import re
+import cloudscraper
 
 
 # 读取 config 文件
@@ -24,13 +25,17 @@ def write_json(fileName, json_obj):
 
 # 获得网页代码
 def get_html(url):
+    scraper = cloudscraper.create_scraper()
     headers = {
         'USER-AGENT': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/67.0.3396.99 Safari/537.36'
     }
     # 发送请求，获得响应
-    response = requests.get(url=url, headers=headers)
+    # response = requests.get(url=url, headers=headers)
+    # response = scraper.get(url=url, headers=headers)
+    response = scraper.get(url)
     # 获得网页源代码
     html = response.text
+    # print(html)
     html = etree.HTML(html)
     return html
 
@@ -50,10 +55,14 @@ def get_release_jp(html, count):
             count) + "]/a[@class='box']/div[@class='meta']/text()")[0]
     try:
         if re.search('\d{4}-\d{2}-\d{2}', release):
-            release = re.search('\d{4}-\d{2}-\d{2}', release).group()
+            release_result = re.search('\d{4}-\d{2}-\d{2}', release).group()
+        elif re.search('\d{2}/\d{2}/\d{4}', release):
+            release_result = re.search('\d{4}', release).group() + '-'
+            release_result += re.search('\d{2}/\d{2}', release).group()
+            release_result = release_result.replace('/', '-')
     except Exception as error_info:
         print('获取发行时间失败，原因：', error_info)
-    return release
+    return release_result
 
 
 # 获取番号
@@ -204,7 +213,8 @@ def main_function(config_value):
                     # 如果不符合过滤条件
                     if check_filter(title, number, filterTitleKeywords, filterNumberOrPrefix):
                         count_new_movie += 1
-                        print('{0: <20}'.format('[' + str(count_new_movie) + ']番号：' + number) + '{0: <20}'.format('发行日期：' + release) +
+                        print('{0: <20}'.format('[' + str(count_new_movie) + ']番号：' + number) + '{0: <20}'.format(
+                            '发行日期：' + release) +
                               ('网址：' + site))
                         # 下载封面
                         download_movie_cover(cover, number, actor, release, config_value, current_time)
