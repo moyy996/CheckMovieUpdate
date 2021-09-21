@@ -8,10 +8,13 @@
 
 ## 参数说明
 
+判断优先级：**lastDownloadMovieReleaseDate** > **lastCheckTime** > **lastDownloadMovieNumber**<br>
+三个判断条件都可以为空。判断时，**前一个条件为空，依次判断下一个条件**。
+
 ```
 
 {
-  "lastCheckTime": 最后检查更新的时间，手动设置
+  "lastCheckTime": 最后检查更新的时间，手动设置(可以为空)
   "filterTitleKeywords": 标题过滤关键字列表
   "filterNumberOrPrefix": 番号过滤列表,可以是番号、番号前缀
   "linkPrefix": 演员页网址前缀
@@ -27,15 +30,15 @@
     {
       "actor": 演员名称
       "linkKeyword": 网址关键字：演员页网址前缀后面、演员页网址后缀前面的部分
-      "lastDownloadMovieNumber": 最后下载的视频番号
-      "lastDownloadMovieReleaseDate": 最后下载的视频发行日期
+      "lastDownloadMovieNumber": 最后下载的视频番号(可以为空)
+      "lastDownloadMovieReleaseDate": 最后下载的视频发行日期(可以为空)
       "check": 是否检查，1为开，0为关
     },
     {
       "actor": 演员名称2
       "linkKeyword": 网址关键字：演员页网址前缀后面、演员页网址后缀前面的部分
-      "lastDownloadMovieNumber": 最后下载的视频番号
-      "lastDownloadMovieReleaseDate": 最后下载的视频发行日期
+      "lastDownloadMovieNumber": 最后下载的视频番号(可以为空)
+      "lastDownloadMovieReleaseDate": 最后下载的视频发行日期(可以为空)
       "check": 是否检查，1为开，0为关
     }
   ]

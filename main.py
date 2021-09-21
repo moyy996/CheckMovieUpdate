@@ -173,21 +173,35 @@ def check_filter(title, number, filterTitleKeywords, filterNumberOrPrefix):
 
 def main_function(config_value):
     current_time = str(time.strftime("%Y-%m-%d %H-%M-%S", time.localtime()))
+    # 最后检查时间 优先级高于 lastDownloadMovieReleaseDate
+    lastCheckTime = config_value['lastCheckTime']
     # 演员列表
     actor_list = config_value['actorList']
     # 过滤条件
     filterTitleKeywords = config_value['filterTitleKeywords']
     filterNumberOrPrefix = config_value['filterNumberOrPrefix']
+    # 输出基本信息
+    print('========================================================================')
+    print('最后检查时间：' + lastCheckTime)
     # 第一层循环 循环演员列表
     for actor_info in actor_list:
+        # 间隔
+        print('========================================================================')
         # 获取需要的变量
         actor = actor_info['actor']
         lastDownloadMovieNumber = actor_info['lastDownloadMovieNumber']
         lastDownloadMovieReleaseDate = actor_info['lastDownloadMovieReleaseDate']
         check = int(str(actor_info['check']))
         count_new_movie = 0  # 是否有更新
-        print('========================================================================')
-        print('演员：' + actor + ' | 上次下载番号：' + lastDownloadMovieNumber + ' | 发行日期：' + lastDownloadMovieReleaseDate)
+        # 判断 番号 发行日期是否为空
+        if lastDownloadMovieNumber and lastDownloadMovieReleaseDate:
+            print('演员：' + actor + ' | 上次下载番号：' + lastDownloadMovieNumber + ' | 最后检查时间：' + lastDownloadMovieReleaseDate)
+        elif lastDownloadMovieNumber and not lastDownloadMovieReleaseDate:
+            print('演员：' + actor + ' | 上次下载番号：' + lastDownloadMovieNumber)
+        elif not lastDownloadMovieNumber and lastDownloadMovieReleaseDate:
+            print('演员：' + actor + ' | 最后检查时间：' + lastDownloadMovieReleaseDate)
+        elif not lastDownloadMovieNumber and not lastDownloadMovieReleaseDate:
+            print('演员：' + actor)
         # 此演员不需要检查就跳过
         if not check:
             continue
@@ -208,16 +222,31 @@ def main_function(config_value):
             while count <= counts:
                 # 获取单个影片信息
                 title, number, release, site, cover = get_movie_info(actor_html, count)
-                # 如果发行时间比最后下载时间晚 并且 番号不一样 就输出并下载封面
-                if lastDownloadMovieReleaseDate <= release and lastDownloadMovieNumber != number:
-                    # 如果不符合过滤条件
-                    if check_filter(title, number, filterTitleKeywords, filterNumberOrPrefix):
-                        count_new_movie += 1
-                        print('{0: <20}'.format('[' + str(count_new_movie) + ']番号：' + number) + '{0: <20}'.format(
-                            '发行日期：' + release) +
-                              ('网址：' + site))
-                        # 下载封面
-                        download_movie_cover(cover, number, actor, release, config_value, current_time)
+                # 判断是否输出并下载封面
+                # 先判断 lastDownloadMovieReleaseDate 再判断 lastCheckTime
+                downloadFile = False
+                if lastDownloadMovieReleaseDate and lastDownloadMovieReleaseDate < release:
+                    downloadFile = True
+                elif lastDownloadMovieReleaseDate and lastDownloadMovieReleaseDate >= release:
+                    downloadFile = False
+                elif not lastDownloadMovieReleaseDate and lastCheckTime and lastCheckTime < release:
+                    downloadFile = True
+                elif not lastDownloadMovieReleaseDate and lastCheckTime and lastCheckTime >= release:
+                    downloadFile = False
+                # 判断 lastDownloadMovieNumber
+                if lastDownloadMovieNumber and lastDownloadMovieNumber == number:
+                    downloadFile = False
+                # 全为空时
+                if not lastDownloadMovieReleaseDate and not lastCheckTime and not lastDownloadMovieNumber:
+                    downloadFile = True
+                # 如果不符合过滤条件
+                if downloadFile and check_filter(title, number, filterTitleKeywords, filterNumberOrPrefix):
+                    count_new_movie += 1
+                    print('{0: <20}'.format('[' + str(count_new_movie) + ']番号：' + number) + '{0: <20}'.format(
+                        '发行日期：' + release) +
+                          ('网址：' + site))
+                    # 下载封面
+                    download_movie_cover(cover, number, actor, release, config_value, current_time)
                 else:
                     # 跳出第三次循环
                     break
